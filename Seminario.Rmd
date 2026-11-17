@@ -9,22 +9,100 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+# Seminario
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## Importar datos
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+### Datos de renta:
 
-```{r cars}
-summary(cars)
+```{r}
+library(dplyr)
 ```
 
-## Including Plots
+```{r}
+# Importar los datos
+renta<- read.csv("Datos/Datos_renta.csv", sep=";", fileEncoding = "UTF-8-BOM",stringsAsFactors=FALSE, na.strings = c("",".."))
+# Seleccionar únicamente la renta neta media por persona
 
-You can also embed plots, for example:
+renta_limpia<- renta %>%
+  filter(`Indicadores.de.renta.media`== "Renta neta media por persona", !is.na(Provincias), is.na(Islas))%>%
+# Seleccionar las columnas necesarias
+  select(Provincia=Provincias, Año= Periodo, Renta=Total)%>%
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+  arrange(Provincia, Año)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+### Datos de temperatura:
+
+```{r}
+  # Importar los datos de temperatura
+  temperatura <- read.csv(
+    "Datos/temperatura_provincias_2015_2023.csv",
+    sep = ",",
+    dec = ".",
+    fileEncoding = "UTF-8",
+    stringsAsFactors = FALSE,
+    colClasses = c("character", "character", "character",
+                   "numeric", "numeric", "numeric")
+  )
+
+  # Convertir la fecha a formato Date
+  temperatura$fecha <- as.Date(temperatura$fecha)
+  
+  temperatura <- temperatura %>%
+  mutate(
+    Año = as.integer(format(fecha, "%Y"))
+  )
+  
+temperatura_anual <- temperatura %>%
+  group_by(cod_ine, provincia, Año) %>%
+  summarise(
+    tmed = round(mean(tmed, na.rm = TRUE), 1),
+    tmax = round(mean(tmax, na.rm = TRUE), 1),
+    tmin = round(mean(tmin, na.rm = TRUE), 1),
+    .groups = "drop"
+  ) %>%
+  arrange(provincia, Año)
+```
+
+
+```{r}
+library(jsonlite)
+
+mortalidad <- fromJSON(
+  "Datos/Datos_mortalidad.json",
+  simplifyVector = FALSE
+)
+
+mortalidad_limpia <-  data.frame()
+
+for (serie in mortalidad) {
+
+  provincia <- NA
+  causa     <- NA
+  sexo      <- NA
+
+  for (m in serie$MetaData) {
+    if (m$T3_Variable == "Provincias")       provincia <- m$Nombre
+    if (m$T3_Variable == "Causa de muerte")  causa     <- trimws(m$Nombre)
+    if (m$T3_Variable == "Sexo")             sexo      <- m$Nombre
+  }
+
+  # 2) Quedarnos solo con series provinciales, todas las causas, ambos sexos
+  if (!is.na(provincia) && sexo == "Total" && grepl("Todas las causas", causa)) {
+
+    # 3) Añadir una fila por cada año de la serie
+    for (dato in serie$Data) {
+      if (dato$Anyo >= 2015 && dato$Anyo<= 2023){      
+        fila <- data.frame(
+        Provincia  = provincia,
+        Anyo       = dato$Anyo,
+        Fallecidos = dato$Valor
+      )
+      mortalidad_limpia <- rbind(mortalidad_limpia, fila)}
+
+    }
+  }
+}
+
+```
