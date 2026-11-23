@@ -1,0 +1,469 @@
+"Provincia","Anyo","Renta"
+"Albacete",2015,9150
+"Albacete",2016,9446
+"Albacete",2017,9847
+"Albacete",2018,10351
+"Albacete",2019,10901
+"Albacete",2020,11104
+"Albacete",2021,11652
+"Albacete",2022,12305
+"Albacete",2023,13058
+"Alicante/Alacant",2015,8695
+"Alicante/Alacant",2016,8814
+"Alicante/Alacant",2017,9313
+"Alicante/Alacant",2018,9736
+"Alicante/Alacant",2019,10177
+"Alicante/Alacant",2020,10236
+"Alicante/Alacant",2021,10770
+"Alicante/Alacant",2022,11378
+"Alicante/Alacant",2023,12313
+"Almería",2015,8029
+"Almería",2016,8207
+"Almería",2017,8569
+"Almería",2018,9072
+"Almería",2019,9436
+"Almería",2020,9709
+"Almería",2021,10103
+"Almería",2022,10605
+"Almería",2023,11543
+"Araba/Álava",2015,NA
+"Araba/Álava",2016,NA
+"Araba/Álava",2017,NA
+"Araba/Álava",2018,NA
+"Araba/Álava",2019,NA
+"Araba/Álava",2020,14962
+"Araba/Álava",2021,15539
+"Araba/Álava",2022,16403
+"Araba/Álava",2023,17806
+"Asturias",2015,11959
+"Asturias",2016,12147
+"Asturias",2017,12489
+"Asturias",2018,12923
+"Asturias",2019,13465
+"Asturias",2020,13505
+"Asturias",2021,14057
+"Asturias",2022,14842
+"Asturias",2023,15784
+"Badajoz",2015,8448
+"Badajoz",2016,8643
+"Badajoz",2017,8971
+"Badajoz",2018,9417
+"Badajoz",2019,9895
+"Badajoz",2020,10001
+"Badajoz",2021,10549
+"Badajoz",2022,11158
+"Badajoz",2023,12068
+"Balears, Illes",2015,11213
+"Balears, Illes",2016,11488
+"Balears, Illes",2017,12297
+"Balears, Illes",2018,12893
+"Balears, Illes",2019,13428
+"Balears, Illes",2020,12486
+"Balears, Illes",2021,13468
+"Balears, Illes",2022,14740
+"Balears, Illes",2023,16118
+"Barcelona",2015,12853
+"Barcelona",2016,13256
+"Barcelona",2017,13622
+"Barcelona",2018,14198
+"Barcelona",2019,14656
+"Barcelona",2020,14676
+"Barcelona",2021,15297
+"Barcelona",2022,16105
+"Barcelona",2023,17062
+"Bizkaia",2015,13949
+"Bizkaia",2016,14216
+"Bizkaia",2017,14605
+"Bizkaia",2018,15047
+"Bizkaia",2019,15547
+"Bizkaia",2020,15555
+"Bizkaia",2021,16192
+"Bizkaia",2022,17225
+"Bizkaia",2023,18738
+"Burgos",2015,12093
+"Burgos",2016,12375
+"Burgos",2017,12701
+"Burgos",2018,13316
+"Burgos",2019,13713
+"Burgos",2020,13777
+"Burgos",2021,14357
+"Burgos",2022,15017
+"Burgos",2023,15988
+"Cantabria",2015,11229
+"Cantabria",2016,11503
+"Cantabria",2017,11874
+"Cantabria",2018,12389
+"Cantabria",2019,12852
+"Cantabria",2020,12865
+"Cantabria",2021,13425
+"Cantabria",2022,14211
+"Cantabria",2023,15043
+"Castellón/Castelló",2015,10136
+"Castellón/Castelló",2016,10504
+"Castellón/Castelló",2017,10958
+"Castellón/Castelló",2018,11461
+"Castellón/Castelló",2019,11987
+"Castellón/Castelló",2020,12079
+"Castellón/Castelló",2021,12680
+"Castellón/Castelló",2022,13305
+"Castellón/Castelló",2023,14029
+"Ceuta",2015,10696
+"Ceuta",2016,10696
+"Ceuta",2017,10767
+"Ceuta",2018,11448
+"Ceuta",2019,12038
+"Ceuta",2020,12358
+"Ceuta",2021,13030
+"Ceuta",2022,13673
+"Ceuta",2023,14625
+"Ciudad Real",2015,8786
+"Ciudad Real",2016,9056
+"Ciudad Real",2017,9482
+"Ciudad Real",2018,10001
+"Ciudad Real",2019,10431
+"Ciudad Real",2020,10570
+"Ciudad Real",2021,11051
+"Ciudad Real",2022,11724
+"Ciudad Real",2023,12529
+"Coruña, A",2015,11024
+"Coruña, A",2016,11383
+"Coruña, A",2017,11706
+"Coruña, A",2018,12207
+"Coruña, A",2019,12764
+"Coruña, A",2020,12841
+"Coruña, A",2021,13319
+"Coruña, A",2022,14294
+"Coruña, A",2023,15319
+"Cuenca",2015,9009
+"Cuenca",2016,9224
+"Cuenca",2017,9722
+"Cuenca",2018,10212
+"Cuenca",2019,10680
+"Cuenca",2020,10991
+"Cuenca",2021,11550
+"Cuenca",2022,12022
+"Cuenca",2023,12725
+"Cáceres",2015,9081
+"Cáceres",2016,9247
+"Cáceres",2017,9544
+"Cáceres",2018,10009
+"Cáceres",2019,10537
+"Cáceres",2020,10660
+"Cáceres",2021,11238
+"Cáceres",2022,11786
+"Cáceres",2023,12771
+"Cádiz",2015,8489
+"Cádiz",2016,8696
+"Cádiz",2017,9028
+"Cádiz",2018,9509
+"Cádiz",2019,10055
+"Cádiz",2020,10113
+"Cádiz",2021,10712
+"Cádiz",2022,11396
+"Cádiz",2023,12335
+"Córdoba",2015,8614
+"Córdoba",2016,8892
+"Córdoba",2017,9290
+"Córdoba",2018,9710
+"Córdoba",2019,10182
+"Córdoba",2020,10314
+"Córdoba",2021,10979
+"Córdoba",2022,11569
+"Córdoba",2023,12386
+"Gipuzkoa",2015,NA
+"Gipuzkoa",2016,15090
+"Gipuzkoa",2017,15372
+"Gipuzkoa",2018,15891
+"Gipuzkoa",2019,16463
+"Gipuzkoa",2020,16399
+"Gipuzkoa",2021,16887
+"Gipuzkoa",2022,18325
+"Gipuzkoa",2023,19616
+"Girona",2015,11095
+"Girona",2016,11409
+"Girona",2017,11841
+"Girona",2018,12355
+"Girona",2019,12843
+"Girona",2020,12865
+"Girona",2021,13485
+"Girona",2022,14176
+"Girona",2023,15130
+"Granada",2015,8877
+"Granada",2016,9090
+"Granada",2017,9440
+"Granada",2018,9885
+"Granada",2019,10380
+"Granada",2020,10463
+"Granada",2021,11100
+"Granada",2022,11754
+"Granada",2023,12709
+"Guadalajara",2015,11036
+"Guadalajara",2016,11212
+"Guadalajara",2017,11600
+"Guadalajara",2018,12083
+"Guadalajara",2019,12521
+"Guadalajara",2020,12624
+"Guadalajara",2021,13149
+"Guadalajara",2022,13829
+"Guadalajara",2023,14689
+"Huelva",2015,8401
+"Huelva",2016,8585
+"Huelva",2017,8948
+"Huelva",2018,9416
+"Huelva",2019,9958
+"Huelva",2020,10112
+"Huelva",2021,10609
+"Huelva",2022,11199
+"Huelva",2023,12008
+"Huesca",2015,11297
+"Huesca",2016,11478
+"Huesca",2017,11954
+"Huesca",2018,12513
+"Huesca",2019,12949
+"Huesca",2020,13158
+"Huesca",2021,13679
+"Huesca",2022,14252
+"Huesca",2023,15140
+"Jaén",2015,8318
+"Jaén",2016,8747
+"Jaén",2017,9044
+"Jaén",2018,9417
+"Jaén",2019,9758
+"Jaén",2020,9958
+"Jaén",2021,10689
+"Jaén",2022,11074
+"Jaén",2023,11847
+"León",2015,11138
+"León",2016,11350
+"León",2017,11702
+"León",2018,12222
+"León",2019,12755
+"León",2020,12917
+"León",2021,13400
+"León",2022,14144
+"León",2023,15110
+"Lleida",2015,10914
+"Lleida",2016,11208
+"Lleida",2017,11624
+"Lleida",2018,12124
+"Lleida",2019,12618
+"Lleida",2020,12896
+"Lleida",2021,13334
+"Lleida",2022,13865
+"Lleida",2023,14713
+"Lugo",2015,10283
+"Lugo",2016,10541
+"Lugo",2017,10878
+"Lugo",2018,11335
+"Lugo",2019,11856
+"Lugo",2020,12021
+"Lugo",2021,12560
+"Lugo",2022,13362
+"Lugo",2023,14316
+"Madrid",2015,13779
+"Madrid",2016,14104
+"Madrid",2017,14461
+"Madrid",2018,15153
+"Madrid",2019,15520
+"Madrid",2020,15579
+"Madrid",2021,16146
+"Madrid",2022,17131
+"Madrid",2023,18142
+"Melilla",2015,9961
+"Melilla",2016,10176
+"Melilla",2017,10314
+"Melilla",2018,10925
+"Melilla",2019,11463
+"Melilla",2020,11665
+"Melilla",2021,12506
+"Melilla",2022,13140
+"Melilla",2023,13995
+"Murcia",2015,8908
+"Murcia",2016,9124
+"Murcia",2017,9518
+"Murcia",2018,9948
+"Murcia",2019,10422
+"Murcia",2020,10574
+"Murcia",2021,11023
+"Murcia",2022,11599
+"Murcia",2023,12446
+"Málaga",2015,8688
+"Málaga",2016,8854
+"Málaga",2017,9313
+"Málaga",2018,9832
+"Málaga",2019,10338
+"Málaga",2020,10261
+"Málaga",2021,10929
+"Málaga",2022,11744
+"Málaga",2023,12950
+"Navarra",2015,NA
+"Navarra",2016,NA
+"Navarra",2017,NA
+"Navarra",2018,NA
+"Navarra",2019,NA
+"Navarra",2020,NA
+"Navarra",2021,14718
+"Navarra",2022,15681
+"Navarra",2023,16423
+"Ourense",2015,10189
+"Ourense",2016,10415
+"Ourense",2017,10729
+"Ourense",2018,11230
+"Ourense",2019,11729
+"Ourense",2020,11937
+"Ourense",2021,12365
+"Ourense",2022,13043
+"Ourense",2023,14049
+"Palencia",2015,11392
+"Palencia",2016,11752
+"Palencia",2017,12024
+"Palencia",2018,12525
+"Palencia",2019,13010
+"Palencia",2020,13153
+"Palencia",2021,13624
+"Palencia",2022,14251
+"Palencia",2023,15147
+"Palmas, Las",2015,9548
+"Palmas, Las",2016,9799
+"Palmas, Las",2017,10328
+"Palmas, Las",2018,10862
+"Palmas, Las",2019,11336
+"Palmas, Las",2020,11172
+"Palmas, Las",2021,11697
+"Palmas, Las",2022,12716
+"Palmas, Las",2023,13806
+"Pontevedra",2015,10153
+"Pontevedra",2016,10353
+"Pontevedra",2017,10726
+"Pontevedra",2018,11220
+"Pontevedra",2019,11726
+"Pontevedra",2020,11881
+"Pontevedra",2021,12425
+"Pontevedra",2022,13170
+"Pontevedra",2023,14137
+"Rioja, La",2015,11191
+"Rioja, La",2016,11536
+"Rioja, La",2017,11914
+"Rioja, La",2018,12460
+"Rioja, La",2019,12930
+"Rioja, La",2020,12738
+"Rioja, La",2021,13215
+"Rioja, La",2022,13864
+"Rioja, La",2023,14827
+"Salamanca",2015,10667
+"Salamanca",2016,10926
+"Salamanca",2017,11278
+"Salamanca",2018,11762
+"Salamanca",2019,12240
+"Salamanca",2020,12355
+"Salamanca",2021,12920
+"Salamanca",2022,13610
+"Salamanca",2023,14583
+"Santa Cruz de Tenerife",2015,9073
+"Santa Cruz de Tenerife",2016,9238
+"Santa Cruz de Tenerife",2017,9738
+"Santa Cruz de Tenerife",2018,10233
+"Santa Cruz de Tenerife",2019,10770
+"Santa Cruz de Tenerife",2020,10679
+"Santa Cruz de Tenerife",2021,11198
+"Santa Cruz de Tenerife",2022,12237
+"Santa Cruz de Tenerife",2023,13366
+"Segovia",2015,10730
+"Segovia",2016,11025
+"Segovia",2017,11378
+"Segovia",2018,11922
+"Segovia",2019,12482
+"Segovia",2020,12722
+"Segovia",2021,13324
+"Segovia",2022,13956
+"Segovia",2023,14949
+"Sevilla",2015,9051
+"Sevilla",2016,9272
+"Sevilla",2017,9584
+"Sevilla",2018,10083
+"Sevilla",2019,10604
+"Sevilla",2020,10717
+"Sevilla",2021,11292
+"Sevilla",2022,12013
+"Sevilla",2023,12964
+"Soria",2015,11674
+"Soria",2016,11961
+"Soria",2017,12377
+"Soria",2018,12907
+"Soria",2019,13353
+"Soria",2020,13889
+"Soria",2021,14385
+"Soria",2022,14721
+"Soria",2023,15626
+"Tarragona",2015,10817
+"Tarragona",2016,11119
+"Tarragona",2017,11506
+"Tarragona",2018,12011
+"Tarragona",2019,12432
+"Tarragona",2020,12491
+"Tarragona",2021,13086
+"Tarragona",2022,13673
+"Tarragona",2023,14559
+"Teruel",2015,10911
+"Teruel",2016,11126
+"Teruel",2017,11432
+"Teruel",2018,11991
+"Teruel",2019,12461
+"Teruel",2020,12656
+"Teruel",2021,13134
+"Teruel",2022,13736
+"Teruel",2023,14573
+"Toledo",2015,8845
+"Toledo",2016,9085
+"Toledo",2017,9512
+"Toledo",2018,9955
+"Toledo",2019,10413
+"Toledo",2020,10533
+"Toledo",2021,10998
+"Toledo",2022,11614
+"Toledo",2023,12422
+"Valencia/València",2015,10377
+"Valencia/València",2016,10641
+"Valencia/València",2017,11041
+"Valencia/València",2018,11634
+"Valencia/València",2019,12145
+"Valencia/València",2020,12333
+"Valencia/València",2021,12823
+"Valencia/València",2022,13548
+"Valencia/València",2023,14435
+"Valladolid",2015,11682
+"Valladolid",2016,12050
+"Valladolid",2017,12396
+"Valladolid",2018,12905
+"Valladolid",2019,13344
+"Valladolid",2020,13490
+"Valladolid",2021,13987
+"Valladolid",2022,14658
+"Valladolid",2023,15590
+"Zamora",2015,9859
+"Zamora",2016,10102
+"Zamora",2017,10431
+"Zamora",2018,10971
+"Zamora",2019,11520
+"Zamora",2020,11737
+"Zamora",2021,12292
+"Zamora",2022,12913
+"Zamora",2023,13897
+"Zaragoza",2015,12020
+"Zaragoza",2016,12008
+"Zaragoza",2017,12592
+"Zaragoza",2018,13063
+"Zaragoza",2019,13516
+"Zaragoza",2020,13637
+"Zaragoza",2021,14087
+"Zaragoza",2022,14750
+"Zaragoza",2023,15650
+"Ávila",2015,9745
+"Ávila",2016,9925
+"Ávila",2017,10291
+"Ávila",2018,10822
+"Ávila",2019,11322
+"Ávila",2020,11577
+"Ávila",2021,12123
+"Ávila",2022,12684
+"Ávila",2023,13602

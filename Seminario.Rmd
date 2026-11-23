@@ -1,70 +1,140 @@
 ---
-title: "Seminario"
+title: "Relación entre la temperatura y la mortalidad en España: influencia del nivel socioeconómico provincial (2015–2023)"
 author: "Yassmine Ahaitaf"
 date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+library(jsonlite)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(readr)
 ```
 
-# Seminario
+# Introducción
 
-## Importar datos
+La relación entre la temperatura ambiental y la mortalidad es una de las más estudiadas en salud pública, y cobra especial interés en un contexto de cambio climático. Un estudio con datos de varios países concluyó que la mayor parte de la mortalidad asociada a la temperatura se debía al frío, y que los días de temperatura extrema aportaban bastante menos que las temperaturas moderadas pero no óptimas (Gasparrini et al., 2015). Es decir, el efecto de la temperatura sobre la mortalidad no se limita a las olas de calor, sino que abarca todo el rango de temperaturas.
+
+Sin embargo, el efecto de la temperatura no tiene por qué ser igual en todas las poblaciones. La vulnerabilidad puede variar según características individuales y del territorio, y la evidencia sobre cómo modifican la relación entre temperatura y mortalidad las características a escala de comunidad es limitada (Son et al., 2019). Entre esas características, el nivel de renta resulta de especial interés, ya que podría influir en la capacidad de adaptación a las temperaturas adversas, por ejemplo a través de las condiciones de la vivienda, el acceso a calefacción o refrigeración o el estado de salud de la población. No obstante, esta posible influencia no está bien establecida y no hay que darla por hecha.
+
+España ofrece un escenario adecuado para explorar esta cuestión, porque combina una notable diversidad climática con diferencias de renta entre sus provincias. Aun así, la relación entre temperatura y mortalidad, y el posible papel de la renta, se conocen peor a escala provincial y con datos agregados que en estudios con series diarias de ciudades concretas.
+
+En este trabajo se estudia la relación entre la temperatura media anual y la tasa de mortalidad en las provincias españolas entre 2015 y 2023, y se explora si el nivel de renta modifica esa relación. Para ello se combinan datos de mortalidad, población y renta del Instituto Nacional de Estadística (INE, s. f.-a, s. f.-b, s. f.-c) con datos de temperatura procedentes de la API histórica de Open-Meteo (s. f.). Al tratarse de datos agregados y de una tasa de mortalidad bruta, sin ajustar por edad, los resultados describen asociaciones a escala territorial y no permiten establecer relaciones causales ni extraer conclusiones sobre las personas.
+
+# Objetivos:
+
+## Objetivo general
+
+Analizar la relación entre la temperatura media anual y la tasa de mortalidad en las provincias españolas durante el periodo 2015-2023, considerando las diferencias territoriales y la posible influencia del nivel socioeconómico, representado mediante la renta neta media por persona.
+
+## Objetivos específicos
+
+1.  Descripción de la evolución temporal y la distribución geográfica de la temperatura en las provincias españolas.
+2.  Descripción de la evolución temporal y la distribución geográfica de la mortalidad, mediante la tasa por 100.000 habitantes.
+3.  Descripción de la evolución temporal y la distribución geográfica de la renta neta media por persona.
+4.  Análisis de la relación entre temperatura y mortalidad y estudiar si el nivel de renta la modifica.
+
+# Metodología
+
+## Diseño del estudio y variables
+
+Se realizó un estudio observacional ecológico con datos agregados por provincia y año para el periodo 2015–2023. Se trabajó con cuatro conjuntos de datos:
+
+- **Temperatura:** temperatura media, máxima y mínima anual por provincia.
+- **Mortalidad:** número anual de fallecimientos por todas las causas y para ambos sexos.
+- **Población:** población provincial utilizada como denominador para calcular tasas.
+- **Renta:** renta neta media por persona, expresada en euros.
+
+La variable principal de mortalidad fue la tasa bruta de mortalidad. El numerador corresponde a las defunciones de cada año y el denominador a la población registrada el 1 de enero de ese mismo año; por tanto, se trata de una aproximación y no de una tasa calculada con la población media anual. La tasa se calculó mediante:
+
+$$
+\text{Tasa bruta de mortalidad} =
+\frac{\text{Número de fallecimientos}}{\text{Población}} \times 100\,000
+$$
+
+Esta tasa expresa el número de fallecimientos por cada 100.000 habitantes. No está ajustada por edad, por lo que las diferencias entre provincias pueden reflejar, en parte, diferencias en la estructura de edad de sus poblaciones.
+
+## Importación y limpieza de datos:
+
+En este apartado se importan y se limpian los cuatro conjuntos de datos (renta, temperatura, mortalidad y población) y después se unen en una única tabla. Se utilizó la ayuda de la IA para importar y limpiar los datos, porque los archivos tenían formatos y particularidades que dificultaban su lectura: un archivo JSON anidado en el caso de la mortalidad, números con punto de miles, distintas codificaciones de caracteres y nombres de provincia escritos de forma diferente según la fuente. Para cada conjunto de datos se explica brevemente qué hace el código de importación y el de limpieza.
 
 ### Datos de renta:
 
+**Importación.** Se lee el archivo CSV de renta con `read.csv`. Con `sep = ";"` se indica que las columnas están separadas por punto y coma, como en los archivos del INE, y con `fileEncoding = "UTF-8-BOM"` se evita que la marca de codificación del inicio del archivo estropee el nombre de la primera columna. `na.strings = c("", "..")` hace que las celdas vacías y los ".." (que el INE usa para datos no disponibles) se lean como `NA`. Con `colClasses = c(Total = "character")` la columna `Total` se lee como texto, porque con el punto de miles (`9.150`) R la interpretaría como el número decimal 9,15. El resultado es un data frame `renta` con todos los indicadores, provincias e islas.
+
 ```{r}
-library(dplyr)
+renta <- read.csv("Datos/Datos_renta.csv", sep = ";", fileEncoding = "UTF-8-BOM",
+                  stringsAsFactors = FALSE, na.strings = c("", ".."),
+                  colClasses = c(Total = "character"))
 ```
 
+**Limpieza.** Con `filter()` nos quedamos solo con el indicador "Renta neta media por persona", descartamos las filas que no corresponden a una provincia (`!is.na(Provincias)`) y las que están desglosadas por isla (`is.na(Islas)`). Con `mutate()` quitamos el punto de miles con `gsub()` y convertimos la columna a número. Después, `select()` conserva y renombra las tres columnas necesarias y `arrange()` ordena la tabla. El resultado, `renta_limpia`, tiene una fila por provincia y año, con la renta neta media por persona en euros.
+
 ```{r}
-# Importar los datos
-renta<- read.csv("Datos/Datos_renta.csv", sep=";", fileEncoding = "UTF-8-BOM",stringsAsFactors=FALSE, na.strings = c("",".."))
 # Seleccionar únicamente la renta neta media por persona
+renta_limpia <- renta %>%
+  filter(`Indicadores.de.renta.media` == "Renta neta media por persona",
+         !is.na(Provincias), is.na(Islas)) %>%
+  # Quitar el punto de miles y convertir a número
+  mutate(Total = as.numeric(gsub("\\.", "", Total))) %>%
+  select(Provincia = Provincias, Anyo = Periodo, Renta = Total) %>%
+  arrange(Provincia, Anyo)
 
-renta_limpia<- renta %>%
-  filter(`Indicadores.de.renta.media`== "Renta neta media por persona", !is.na(Provincias), is.na(Islas))%>%
-# Seleccionar las columnas necesarias
-  select(Provincia=Provincias, Año= Periodo, Renta=Total)%>%
-
-  arrange(Provincia, Año)
 ```
 
 ### Datos de temperatura:
 
-```{r}
-  # Importar los datos de temperatura
-  temperatura <- read.csv(
-    "Datos/temperatura_provincias_2015_2023.csv",
-    sep = ",",
-    dec = ".",
-    fileEncoding = "UTF-8",
-    stringsAsFactors = FALSE,
-    colClasses = c("character", "character", "character",
-                   "numeric", "numeric", "numeric")
-  )
+**Obtención de los datos**: Los datos de temperatura se obtuvieron mediante la Historical Weather API de Open-Meteo. Se descargaron las temperaturas medias, máximas y mínimas diarias para el periodo 2015–2023, utilizando las coordenadas geográficas de las capitales de 50 provincias españolas. Posteriormente, los registros diarios se agruparon por provincia y año y se calculó la media de los valores diarios para obtener los indicadores anuales.
+Por tanto, los valores representan las condiciones meteorológicas estimadas para las coordenadas de cada capital provincial y no una media espacial de toda la superficie de cada provincia. El script utiliza la selección predeterminada de modelos de la API (*Best Match*), sin especificar exclusivamente ERA5-Land. El script de descarga fue generado con ayuda de una herramienta de inteligencia artificial y se incluye en la carpeta `Datos` para documentar y facilitar la reproducción de este paso.
 
-  # Convertir la fecha a formato Date
-  temperatura$fecha <- as.Date(temperatura$fecha)
-  
-  temperatura <- temperatura %>%
-  mutate(
-    Año = as.integer(format(fecha, "%Y"))
-  )
-  
+**Importación.** El archivo CSV de temperatura tiene una fila por fecha y provincia. Con `sep = ","` y `dec = "."` se indica el separador de columnas y el de decimales, y con `colClasses` se fija el tipo de cada columna (las tres primeras como texto, para conservar ceros como los de los códigos INE, y las tres últimas como números: temperatura media, máxima y mínima). Después, `as.Date()` convierte la columna `fecha` a formato fecha para poder extraer el año.
+
+```{r}
+# Importar los datos
+temperatura <- read.csv(
+  "Datos/temperatura_provincias_2015_2023.csv",
+  sep = ",", dec = ".", fileEncoding = "UTF-8", stringsAsFactors = FALSE,
+  colClasses = c("character", "character", "character",
+                 "numeric", "numeric", "numeric")
+)
+
+temperatura$fecha <- as.Date(temperatura$fecha)
+```
+
+**Limpieza.** Con `mutate()` se crea la columna `Anyo` extrayendo el año de la fecha con `format(fecha, "%Y")`, y con `recode()` se cambian los nombres de ocho provincias para que coincidan con los que usa el INE en los otros archivos; sin este paso, la unión posterior de las tablas perdería esas provincias. Después se agrupa por provincia y año con `group_by()` y, con `summarise()`, se calcula la media anual de la temperatura media, máxima y mínima (`na.rm = TRUE` ignora los valores ausentes y `round(..., 1)` deja un decimal). El resultado, `temperatura_anual`, tiene una fila por provincia y año (50 provincias × 9 años = 450 filas). Ceuta y Melilla no están en este archivo.
+
+```{r}
 temperatura_anual <- temperatura %>%
-  group_by(cod_ine, provincia, Año) %>%
+  mutate(
+    Anyo = as.integer(format(fecha, "%Y")),
+    Provincia = recode(provincia,
+      "A Coruña"   = "Coruña, A",
+      "Alicante"   = "Alicante/Alacant",
+      "Baleares"   = "Balears, Illes",
+      "Castellón"  = "Castellón/Castelló",
+      "La Rioja"   = "Rioja, La",
+      "Las Palmas" = "Palmas, Las",
+      "Valencia"   = "Valencia/València",
+      "Álava"      = "Araba/Álava"
+    )
+  ) %>%
+  group_by(cod_ine, Provincia, Anyo) %>%
   summarise(
     tmed = round(mean(tmed, na.rm = TRUE), 1),
     tmax = round(mean(tmax, na.rm = TRUE), 1),
     tmin = round(mean(tmin, na.rm = TRUE), 1),
     .groups = "drop"
   ) %>%
-  arrange(provincia, Año)
+  arrange(Provincia, Anyo)
 ```
 
+### Datos de mortalidad:
+
+Los datos de mortalidad están en un archivo JSON anidado. Con `fromJSON(..., simplifyVector = FALSE)` se lee el archivo como una lista de listas, sin simplificarla. Cada elemento de la lista es una serie que corresponde a una combinación de variables (provincia, causa de muerte y sexo), con dos partes: `MetaData`, que describe esa combinación, y `Data`, que contiene el año y el valor de cada dato.
+
+Para extraer la información se usa un bucle `for` que recorre las series. Dentro de cada una, un segundo bucle recorre los metadatos y guarda en `provincia`, `causa` y `sexo` el valor de cada variable (`trimws()` elimina espacios sobrantes). Después, el `if` conserva solo las series de una provincia, con sexo "Total" y causa "Todas las causas". Finalmente, un tercer bucle recorre los datos de esa serie y, para los años 2015 a 2023, crea una fila con la provincia, el año y el número de fallecidos y la añade a la tabla con `rbind()`. El resultado, `mortalidad_limpia`, tiene una fila por provincia y año (52 provincias × 9 años = 468 filas).
 
 ```{r}
 library(jsonlite)
@@ -88,10 +158,10 @@ for (serie in mortalidad) {
     if (m$T3_Variable == "Sexo")             sexo      <- m$Nombre
   }
 
-  # 2) Quedarnos solo con series provinciales, todas las causas, ambos sexos
+  # 2) Quedar solo con series provinciales, todas las causas, ambos sexos
   if (!is.na(provincia) && sexo == "Total" && grepl("Todas las causas", causa)) {
 
-    # 3) Añadir una fila por cada año de la serie
+    # Añadir una fila por cada año de la serie
     for (dato in serie$Data) {
       if (dato$Anyo >= 2015 && dato$Anyo<= 2023){      
         fila <- data.frame(
@@ -106,3 +176,591 @@ for (serie in mortalidad) {
 }
 
 ```
+
+### Datos de población:
+
+**Importación.** La población se necesita para calcular la tasa de mortalidad por habitante. Se importa el CSV del INE con los mismos argumentos que el de renta, salvo `fileEncoding = "latin1"`, porque este archivo está codificado en ISO-8859-1 y con otra codificación las tildes y las eñes saldrían mal.
+
+```{r}
+poblacion <- read.csv("Datos/Datos_poblacion.csv", sep = ";", fileEncoding = "latin1",
+                      stringsAsFactors = FALSE, na.strings = c("", ".."),
+                      colClasses = c(Total = "character"))
+```
+
+**Limpieza.** Con `filter()` nos quedamos con el total de ambos sexos (`Sexo == "Total"`), con todas las edades juntas (`Edad.simple == "Todas las edades"`) y solo con la población a 1 de enero de cada año (`grepl("^1 de enero", Periodo)`), porque la tabla trae varias fechas por año. Con `mutate()` se crean tres columnas: `Poblacion` (quitando el punto de miles y convirtiendo a número), `Provincia` (quitando con `sub()` el código numérico que precede al nombre, como en "02 Albacete") y `Anyo` (extrayendo con una expresión regular las cuatro últimas cifras de "1 de enero de 2023"). Después se conservan los años 2015 a 2023 y las tres columnas necesarias. El resultado, `poblacion_limpia`, tiene 52 provincias × 9 años = 468 filas.
+
+```{r}
+poblacion_limpia <- poblacion %>%
+  filter(Sexo == "Total",
+         Edad.simple == "Todas las edades",
+         grepl("^1 de enero", Periodo)) %>%
+  mutate(
+    Poblacion = as.numeric(gsub("\\.", "", Total)),                # 389.070 -> 389070
+    Provincia = sub("^[0-9]+ ", "", Provincias),                   # "02 Albacete" -> "Albacete"
+    Anyo      = as.integer(sub(".*([0-9]{4})$", "\\1", Periodo))   # "1 de enero de 2023" -> 2023
+  ) %>%
+  filter(Anyo >= 2015, Anyo <= 2023) %>%
+  select(Provincia, Anyo, Poblacion)
+
+dim(poblacion_limpia)   # esperado: 468 filas
+```
+
+### Unión de mortalidad y población y cálculo de la tasa de mortalidad:
+
+Primero se unen la mortalidad y la población por provincia y año con `inner_join()` y se calcula la tasa de mortalidad: fallecidos entre población por 100.000 habitantes, redondeada a número entero. La tasa se calcula, y la columna `Tasa_mortalidad` pasa después a las demás tablas, en lugar de recalcularla cada vez que se necesita. La tabla resultante, `mortalidad_poblacion`, contiene las 52 provincias (468 filas). Se comprueban las dimensiones, que estén las 52 provincias y los 9 años, y los valores ausentes .
+
+```{r}
+# Integrar mortalidad y población
+mortalidad_poblacion <- inner_join(
+  mortalidad_limpia,
+  poblacion_limpia,
+  by = c("Provincia", "Anyo")
+)
+
+# Calcular la tasa de mortalidad (por 100.000 habitantes)
+mortalidad_poblacion <- mortalidad_poblacion %>%
+  mutate(
+    Tasa_mortalidad = round((Fallecidos / Poblacion) * 100000)
+  )
+
+# Comprobar dimensiones
+dim(mortalidad_poblacion)   # esperado: 468 filas
+
+# Comprobar provincias y años
+n_distinct(mortalidad_poblacion$Provincia)
+sort(unique(mortalidad_poblacion$Anyo))
+
+# Comprobar valores ausentes
+colSums(is.na(mortalidad_poblacion))
+
+head(mortalidad_poblacion)
+```
+
+### Unión con temperatura y renta:
+
+A `mortalidad_poblacion` se le añaden después la temperatura y la renta. Primero, `inner_join()` une la temperatura y conserva solo las provincias presentes en ambas tablas, por lo que Ceuta y Melilla desaparecen al no tener datos de temperatura. Después, `left_join()` añade la renta sin perder filas, de modo que las observaciones sin dato de renta (Álava, Gipuzkoa y Navarra en algunos años) se conservan con `NA`. La tasa de mortalidad ya viene calculada, así que no se vuelve a calcular.
+
+Al final se hacen varias comprobaciones: las dimensiones de la tabla (esperamos 450 filas), el número de valores ausentes por columna (esperamos 12 en `Renta`), el número de provincias y los años presentes, y que no haya filas duplicadas para una misma provincia y año.
+
+```{r}
+# Unir con la temperatura
+datos <- inner_join(
+  mortalidad_poblacion,
+  temperatura_anual,
+  by = c("Provincia", "Anyo")
+)
+
+# Incorporar la renta
+datos <- left_join(
+  datos,
+  renta_limpia,
+  by = c("Provincia", "Anyo")
+)
+
+# Comprobar dimensiones
+dim(datos)
+
+# Comprobar valores ausentes
+colSums(is.na(datos))
+
+# Comprobar número de provincias y años
+n_distinct(datos$Provincia)
+sort(unique(datos$Anyo))
+
+# Comprobar duplicados
+sum(duplicated(datos[c("Provincia", "Anyo")]))
+
+head(datos)
+
+```
+
+## Métodos estadísticos e hipótesis
+
+Se combinaron métodos descriptivos y modelos inferenciales. Se adoptó un nivel de significación de $\alpha=0,05$.
+
+### Estadística descriptiva
+
+Se calcularon la media, mediana, desviación estándar, mínimo y máximo para resumir la distribución de las variables. También se utilizaron tablas y gráficos (series temporales, diagramas de barras y diagramas de cajas) para describir la evolución y las diferencias entre provincias.
+
+### Correlación de Spearman
+
+Se utilizó para estudiar la dirección y la intensidad de la asociación monotónica entre temperatura media y tasa de mortalidad, y entre renta y tasa de mortalidad. Spearman trabaja con rangos y no exige que la relación sea lineal ni que las variables sigan una distribución normal.
+
+- **Hipótesis nula (**$H_0$): el coeficiente de correlación de Spearman es cero ($\rho_s=0$); no existe asociación monotónica.
+- **Hipótesis alternativa (**$H_1$): el coeficiente es distinto de cero ($\rho_s\neq 0$); existe asociación monotónica (Schober et al., 2018).
+
+### Regresión lineal múltiple y comparación de modelos
+
+Se ajustaron modelos de regresión lineal múltiple para estudiar la asociación de la temperatura y la renta con la tasa de mortalidad. Se incluyeron efectos fijos de provincia y año para controlar estadísticamente las diferencias constantes entre provincias y los cambios comunes a cada año (Pennsylvania State University, s. f.).
+
+Se compararon dos modelos: uno sin interacción y otro que incorpora el producto entre temperatura y renta. La comparación mediante ANOVA permite evaluar si añadir el término de interacción mejora el ajuste.
+
+- **Hipótesis nula (**$H_0$): el coeficiente de interacción es cero; incluir la interacción no mejora significativamente el modelo.
+- **Hipótesis alternativa (**$H_1$): el coeficiente de interacción es distinto de cero; incluir la interacción mejora significativamente el modelo.
+
+# Resultados
+
+## Objetivo específico 1. Análisis temporal y geográfico de las temperaturas en España (2015–2023)
+
+### Estadísticos descriptivos
+
+```{r}
+#Resumen estadístico
+resumen_temperaturas <- datos %>%
+  summarise(
+    media_tmed = mean(tmed),
+    mediana_tmed = median(tmed),
+    desviacion_tmed = sd(tmed),
+    minimo_tmed = min(tmed),
+    maximo_tmed = max(tmed),
+    media_tmax = mean(tmax),
+    media_tmin = mean(tmin)
+  )
+
+knitr::kable(
+  resumen_temperaturas,
+  digits = 2,
+  caption = "Estadísticos descriptivos de las temperaturas (2015-2023)"
+)
+```
+
+Durante el periodo 2015–2023, la temperatura media de las observaciones provinciales-anuales fue de aproximadamente 15,55 °C, con una desviación estándar de 2,64 °C. La media de las temperaturas máximas fue de 20,72 °C y la de las mínimas, de 10,81 °C.
+
+### Evolución anual
+
+```{r}
+# Calcular temperaturas medias por año
+
+temperaturas_anuales <- datos %>%
+  group_by(Anyo) %>%
+  summarise(
+    temperatura_media = mean(tmed, na.rm = TRUE),
+    temperatura_maxima = mean(tmax, na.rm = TRUE),
+    temperatura_minima = mean(tmin, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+temperaturas_anuales
+
+#Representación gráfica: evolución de la temperatura media
+
+ggplot(temperaturas_anuales,
+       aes(x = Anyo, y = temperatura_media)) +
+  geom_line(linewidth = 1, color = "steelblue") +
+  geom_point(size = 2.5, color = "darkred") +
+  scale_x_continuous(breaks = 2015:2023) +
+  labs(
+    title = "Evolución de la temperatura media anual",
+    subtitle = "Media de las temperaturas de 50 provincias españolas (2015-2023)",
+    x = "Año",
+    y = "Temperatura media (°C)"
+  ) +
+  theme_minimal()
+```
+
+La evolución presentó fluctuaciones entre años. El valor medio más bajo se observó en 2018 (aproximadamente 14,9 °C), mientras que el más elevado correspondió a 2022 (aproximadamente 16,3 °C). En 2023 la media se mantuvo elevada, alrededor de 16,1 °C.
+
+### Diferencias entre provincias
+
+```{r temperatura-provincia}
+temperaturas_provincia <- datos %>%
+  group_by(Provincia) %>%
+  summarise(media_tmed = mean(tmed, na.rm = TRUE),
+            .groups = "drop") %>%
+  arrange(desc(media_tmed))
+
+kable(head(temperaturas_provincia, 10), digits = 2,
+      caption = "Diez provincias con mayor temperatura media")
+kable(tail(temperaturas_provincia, 10), digits = 2,
+      caption = "Diez provincias con menor temperatura media")
+
+ggplot(temperaturas_provincia,
+       aes(x = reorder(Provincia, media_tmed), y = media_tmed)) +
+  geom_col(fill = "indianred") + coord_flip() +
+  labs(title = "Temperatura media por provincia (2015–2023)",
+       x = "Provincia", y = "Temperatura media (°C)") +
+  theme_minimal()
+```
+
+Las diferencias geográficas son marcadas. Entre las provincias con temperaturas medias más elevadas destacan Santa Cruz de Tenerife, Almería y 
+
+Las diferencias geográficas son marcadas. Entre las provincias con temperaturas medias más elevadas destacan Santa Cruz de Tenerife, Almería y Las Palmas. En el extremo opuesto se encuentran provincias de zonas interiores y del norte peninsular. Estas diferencias reflejan la diversidad climática del territorio español.
+
+### Variabilidad anual y tendencia lineal
+
+```{r}
+#Variabilidad de las temperaturas a lo largo del tiempo
+ggplot(datos,
+       aes(x = factor(Anyo), y = tmed)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(
+    title = "Distribución de las temperaturas medias por año",
+    subtitle = "Variabilidad entre las provincias españolas (2015-2023)",
+    x = "Año",
+    y = "Temperatura media (°C)"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+modelo_temperatura <- lm(temperatura_media ~ Anyo,
+                         data = temperaturas_anuales)
+summary(modelo_temperatura)
+```
+
+La regresión estimó una pendiente positiva de 0,0835 °C por año, equivalente a unos 0,84 °C por década. Sin embargo, la pendiente no fue estadísticamente significativa (p = 0,1613). Por tanto, aunque la estimación apunta a una tendencia creciente, con solo nueve observaciones anuales no se dispone de evidencia suficiente para confirmar una tendencia lineal en este periodo. El R² fue 0,2595.
+
+## Objetivo específico 2. Análisis temporal y distribución geográfica de la mortalidad en España (2015–2023)
+
+```{r}
+mortalidad_anual <- mortalidad_poblacion %>%
+  group_by(Anyo) %>%
+  summarise(
+    Total_fallecidos = sum(Fallecidos, na.rm = TRUE),
+    Poblacion_total = sum(Poblacion, na.rm = TRUE),
+    Tasa_mortalidad = round((Total_fallecidos / Poblacion_total) * 100000),
+    .groups = "drop"
+  )
+```
+
+```{r}
+ggplot(mortalidad_anual,
+       aes(x = Anyo, y = Tasa_mortalidad)) +
+  geom_line(linewidth = 1, color = "steelblue") +
+  geom_point(size = 2.5, color = "darkred") +
+  scale_x_continuous(breaks = 2015:2023) +
+  labs(
+    title = "Evolución de la tasa de mortalidad en España",
+    subtitle = "Periodo 2015-2023",
+    x = "Año",
+    y = "Fallecimientos por cada 100.000 habitantes"
+  ) +
+  theme_minimal()
+```
+
+La tasa bruta se mantuvo relativamente estable entre 2015 y 2019, con valores aproximados entre 879 y 911 fallecimientos por cada 100.000 habitantes. En 2020 aumentó hasta aproximadamente 1.041, el valor más elevado del periodo. Posteriormente descendió, aunque permaneció por encima de algunos valores prepandémicos en 2021 y 2022. En 2023 se situó alrededor de 901.
+
+El incremento observado en 2020 coincide temporalmente con la pandemia de COVID-19. No obstante, los datos analizados incluyen fallecimientos por todas las causas y este análisis descriptivo no permite atribuir causalidad a un factor concreto.
+
+### Diferencias entre provincias
+
+```{r mortalidad-provincia}
+mortalidad_provincia <- mortalidad_poblacion %>%
+  group_by(Provincia) %>%
+  summarise(media_tasa = mean(Tasa_mortalidad, na.rm = TRUE),
+            .groups = "drop") %>%
+  arrange(desc(media_tasa))
+
+kable(head(mortalidad_provincia, 10), digits = 1,
+      caption = "Provincias con mayor tasa bruta media de mortalidad")
+kable(tail(mortalidad_provincia, 10), digits = 1,
+      caption = "Provincias con menor tasa bruta media de mortalidad")
+
+ggplot(mortalidad_provincia,
+       aes(x = reorder(Provincia, media_tasa), y = media_tasa)) +
+  geom_col(fill = "indianred") + coord_flip() +
+  labs(title = "Tasa bruta media de mortalidad por provincia",
+       subtitle = "Promedio del periodo 2015–2023",
+       x = "Provincia", y = "Fallecimientos por 100.000 habitantes") +
+  theme_minimal()
+```
+
+Las tasas medias más elevadas se observaron en Zamora, Lugo y Ourense. Entre las más bajas se encontraron Melilla, Ceuta, Las Palmas y Balears. Estas diferencias no deben interpretarse directamente como diferencias en el riesgo individual de fallecer: la tasa utilizada es bruta y no está ajustada por edad. La estructura demográfica de cada provincia puede influir notablemente en los resultados.
+
+### Distribución de las tasas
+
+```{r}
+# Variabilidad territorial de la mortalidad
+ggplot(mortalidad_poblacion,
+       aes(x = factor(Anyo), y = Tasa_mortalidad)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(
+    title = "Distribución de las tasas de mortalidad por año",
+    subtitle = "Variabilidad entre las 52 provincias (2015-2023)",
+    x = "Año",
+    y = "Fallecimientos por cada 100.000 habitantes"
+  ) +
+  theme_minimal()
+```
+
+El diagrama de cajas permite comparar la dispersión de las tasas provinciales en cada año. La distribución muestra variabilidad territorial y un desplazamiento hacia tasas más elevadas en 2020, coherente con el máximo observado en la serie anual.
+
+## Objetivo específico 3: análisis temporal y geográfico de la renta en las provincias españolas (2015–2023)
+
+### Estadísticos descriptivos y evolución temporal
+
+```{r}
+# Estadísticos descriptivos de la renta
+
+resumen_renta <- datos %>%
+  summarise(
+    media_renta = mean(Renta, na.rm = TRUE),
+    mediana_renta = median(Renta, na.rm = TRUE),
+    desviacion_renta = sd(Renta, na.rm = TRUE),
+    minimo_renta = min(Renta, na.rm = TRUE),
+    maximo_renta = max(Renta, na.rm = TRUE)
+  )
+
+knitr::kable(
+  resumen_renta,
+  digits = 2,
+  caption = "Estadísticos descriptivos de la renta neta media por persona (2015-2023)"
+)
+```
+
+```{r}
+# Calcular la renta media anual
+
+renta_anual <- datos %>%
+  group_by(Anyo) %>%
+  summarise(
+    renta_media = mean(Renta, na.rm = TRUE),
+    renta_mediana = median(Renta, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+renta_anual
+
+ggplot(renta_anual,
+       aes(x = Anyo, y = renta_media)) +
+  geom_line(linewidth = 1, color = "darkgreen") +
+  geom_point(size = 2.5, color = "darkorange") +
+  scale_x_continuous(breaks = 2015:2023) +
+  labs(
+    title = "Evolución de la renta neta media por persona",
+    subtitle = "Media de las provincias españolas (2015-2023)",
+    x = "Año",
+    y = "Renta media (€)"
+  ) +
+  theme_minimal()
+
+```
+
+La renta neta media por persona aumentó de aproximadamente 10.285 € en 2015 a 14.421 € en 2023, lo que supone un incremento nominal cercano al 40 %.
+
+### Diferencias entre provincias
+
+```{r renta-provincia}
+renta_provincia <- datos %>%
+  group_by(Provincia) %>%
+  summarise(media_renta = mean(Renta, na.rm = TRUE),
+            .groups = "drop") %>%
+  arrange(desc(media_renta))
+
+kable(head(renta_provincia, 10), digits = 0,
+      caption = "Provincias con mayor renta neta media")
+kable(tail(renta_provincia, 10), digits = 0,
+      caption = "Provincias con menor renta neta media")
+
+ggplot(renta_provincia,
+       aes(x = reorder(Provincia, media_renta), y = media_renta)) +
+  geom_col() + coord_flip() +
+  labs(title = "Renta neta media por persona y provincia",
+       subtitle = "Promedio del periodo 2015–2023",
+       x = "Provincia", y = "Renta media (€)") +
+  theme_minimal()
+```
+
+Entre las provincias con mayor renta media destacan Gipuzkoa, Araba/Álava y Bizkaia. Entre las de menor renta se encuentran Almería, Jaén y Badajoz. La diferencia entre los promedios de Gipuzkoa y Almería es de aproximadamente 7.280 € por persona y año.
+
+### Distribución anual
+
+```{r}
+ggplot(datos,
+       aes(x = factor(Anyo), y = Renta)) +
+  geom_boxplot(fill = "lightgreen") +
+  labs(
+    title = "Distribución de la renta por año",
+    subtitle = "Variabilidad entre provincias españolas (2015-2023)",
+    x = "Año",
+    y = "Renta neta media por persona (€)"
+  ) +
+  theme_minimal()
+```
+
+El diagrama de cajas permite observar la dispersión de la renta entre provincias y su evolución. Los valores ausentes de renta se excluyen automáticamente del gráfico y de los cálculos que utilizan `na.rm = TRUE`.
+
+## Objetivo específico 4. Analizar la relación entre temperatura y mortalidad y estudiar el posible papel modificador del nivel socioeconómico (2015–2023)
+
+Para este objetivo se seleccionaron las observaciones con información disponible de temperatura, tasa de mortalidad y renta.
+
+```{r}
+datos_relacion <- datos %>%
+  filter(!is.na(tmed),!is.na(Tasa_mortalidad),!is.na(Renta))
+
+nrow(datos_relacion)
+n_distinct(datos_relacion$Provincia)
+colSums(is.na(datos_relacion[c("tmed", "Tasa_mortalidad", "Renta")]))
+```
+
+### Asociación entre temperatura y tasa de mortalidad
+
+```{r spearman-temperatura}
+cor.test(datos_relacion$tmed,
+         datos_relacion$Tasa_mortalidad,
+         method = "spearman",
+         exact = FALSE)
+
+ggplot(datos_relacion,
+       aes(x = tmed, y = Tasa_mortalidad)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(title = "Temperatura media y tasa bruta de mortalidad",
+       x = "Temperatura media (°C)",
+       y = "Fallecimientos por 100.000 habitantes") +
+  theme_minimal()
+
+```
+
+Se obtuvo una correlación de Spearman negativa y fuerte ($\rho_s \approx -0,708$, p \< 0,001). En las observaciones analizadas, las provincias-año con temperaturas medias más elevadas tendieron a presentar tasas brutas de mortalidad más bajas.
+
+Este resultado representa una asociación entre observaciones agregadas y no demuestra que el aumento de temperatura reduzca la mortalidad. Puede estar influido por diferencias geográficas, demográficas y socioeconómicas, especialmente por la estructura de edad de la población. Además, el p-valor convencional no tiene en cuenta que una misma provincia aparece en varios años; por ello, su significación debe interpretarse con cautela. La recta lineal superpuesta al gráfico es únicamente una ayuda visual y no sustituye a la correlación de Spearman.
+
+### Asociación entre renta y tasa de mortalidad
+
+```{r spearman-renta}
+cor.test(datos_relacion$Renta,
+         datos_relacion$Tasa_mortalidad,
+         method = "spearman",
+         exact = FALSE)
+
+ggplot(datos_relacion,
+       aes(x = Renta, y = Tasa_mortalidad)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(title = "Renta neta media y tasa bruta de mortalidad",
+       x = "Renta neta media por persona (€)",
+       y = "Fallecimientos por 100.000 habitantes") +
+  theme_minimal()
+```
+
+La correlación de Spearman fue positiva, pero débil ($\rho_s \approx 0,194$, p \< 0,001). Esto indica una asociación monotónica positiva de pequeña magnitud entre renta y tasa bruta de mortalidad en el conjunto analizado. El resultado no implica que una mayor renta cause un aumento de la mortalidad; las diferencias de edad y otras características territoriales pueden influir en esta asociación.
+
+### ¿Modifica la renta la relación entre temperatura y mortalidad?
+
+Se ajustaron modelos con efectos fijos de provincia y año. Las variables continuas se centraron para facilitar la interpretación de los coeficientes principales.
+
+```{r}
+# transformación de la renta a miles de euros para facilitar la interpretación de los coeficientes
+datos_relacion <- datos_relacion %>%
+  mutate(
+    temperatura_c = tmed - mean(tmed, na.rm = TRUE),
+    renta_c = (Renta - mean(Renta, na.rm = TRUE)) / 1000
+  )
+
+# Construcción del modelo de interacción
+
+# Modelo sin interacción
+modelo_sin_interaccion <- lm(
+  Tasa_mortalidad ~ temperatura_c + renta_c +
+    factor(Provincia) + factor(Anyo),
+  data = datos_relacion
+)
+
+# Modelo con interacción entre temperatura y renta
+modelo_interaccion <- lm(
+  Tasa_mortalidad ~ temperatura_c * renta_c +
+    factor(Provincia) + factor(Anyo),
+  data = datos_relacion
+)
+
+# Resumen del modelo
+coef(summary(modelo_interaccion))[c("temperatura_c", "renta_c", "temperatura_c:renta_c"), ]
+
+#Comprobar si la interacción mejora el modelo
+anova(
+  modelo_sin_interaccion,
+  modelo_interaccion
+)
+
+#Visualización del modelo
+
+renta_por_provincia <- datos_relacion %>%
+  group_by(Provincia) %>%
+  summarise(
+    renta_media_provincia = mean(Renta, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    nivel_renta = ntile(renta_media_provincia, 3),
+    nivel_renta = factor(
+      nivel_renta,
+      levels = 1:3,
+      labels = c("Renta baja", "Renta intermedia", "Renta alta")
+    )
+  )
+
+datos_relacion <- datos_relacion %>%
+  select(-any_of("nivel_renta")) %>%
+  left_join(
+    renta_por_provincia %>% select(Provincia, nivel_renta),
+    by = "Provincia"
+  )
+
+
+ggplot(datos_relacion,
+       aes(x = tmed,
+           y = Tasa_mortalidad,
+           color = nivel_renta)) +
+  geom_point(alpha = 0.45) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Temperatura y mortalidad según el nivel de renta",
+    subtitle = "Comparación entre grupos de provincias (2015-2023)",
+    x = "Temperatura media anual (°C)",
+    y = "Tasa de mortalidad (por 100.000 habitantes)",
+    color = "Nivel de renta"
+  ) +
+  theme_minimal()
+```
+
+La comparación de los modelos no mostró una mejora estadísticamente significativa al añadir la interacción entre temperatura y renta (p = 0,358). Por tanto, no se encontró evidencia suficiente para afirmar que la asociación entre temperatura y tasa de mortalidad varíe según el nivel de renta.
+
+El modelo con interacción presentó un R² elevado (aproximadamente 0,960), pero este valor debe interpretarse con cautela: una parte importante del ajuste procede de los efectos fijos de provincia y año. No debe concluirse que la temperatura y la renta por sí solas expliquen el 96 % de la variabilidad de la mortalidad.
+
+# Discusión y limitaciones
+
+Los resultados muestran diferencias territoriales en temperatura, mortalidad y renta, así como asociaciones estadísticas entre algunas de estas variables. Sin embargo, el diseño ecológico y observacional impone limitaciones importantes:
+
+1.  **Agregación territorial:** los datos están resumidos por provincia y año. No permiten trasladar directamente las asociaciones observadas a individuos.
+2.  **Mortalidad no ajustada por edad:** las tasas brutas pueden estar condicionadas por el envejecimiento y por las diferencias en la estructura demográfica provincial.
+3.  **Periodo limitado:** nueve años constituyen una serie temporal corta para estudiar tendencias climáticas de largo plazo.
+4.  **Datos incompletos:** la temperatura está disponible para 50 provincias, mientras que mortalidad y población cubren 52; además, hay observaciones sin renta. El análisis conjunto se limita a los casos completos.
+5.  **Renta nominal:** los valores no se han corregido por inflación ni por coste de vida.
+6.  **Variables no incluidas:** no se han incorporado otros posibles factores relacionados con la mortalidad, como estructura por edad, condiciones sanitarias, contaminación, humedad, episodios extremos de temperatura o características individuales.
+7. **Aproximación del denominador poblacional:** los fallecimientos corresponden al conjunto de cada año, mientras que la población utilizada es la registrada a 1 de enero de ese mismo año. Es una aproximación para calcular la tasa anual, pero no equivale a utilizar la población media expuesta al riesgo durante todo el año y puede introducir cierta imprecisión.
+8. **Observaciones repetidas:** cada provincia aparece en varios años. Las pruebas convencionales de correlación y los errores estándar de los modelos lineales pueden no tener en cuenta completamente esta dependencia temporal y territorial.
+
+
+Por estas razones, los análisis deben considerarse exploratorios y no permiten establecer relaciones causales.
+
+# Conclusiones
+
+- La temperatura media mostró fluctuaciones durante 2015–2023. La regresión estimó una pendiente positiva, pero no estadísticamente significativa.
+- Se observaron diferencias geográficas importantes en la temperatura media de las provincias.
+- La tasa bruta de mortalidad alcanzó su valor máximo en 2020 y descendió posteriormente. También se identificaron diferencias territoriales, que deben interpretarse teniendo en cuenta que las tasas no están ajustadas por edad.
+- La renta neta media por persona aumentó en términos nominales durante el periodo, aunque persistieron diferencias entre provincias.
+- Se observó una asociación negativa fuerte entre temperatura media y tasa bruta de mortalidad, y una asociación positiva débil entre renta y tasa bruta de mortalidad. Estas asociaciones no implican causalidad.
+- La interacción entre temperatura y renta no mejoró significativamente el modelo, por lo que no se encontró evidencia suficiente de que el nivel de renta modificara la asociación entre temperatura y mortalidad.
+
+En conjunto, los resultados ponen de manifiesto la importancia de considerar las diferencias territoriales y demográficas al estudiar la relación entre factores ambientales y mortalidad. Para profundizar en esta cuestión sería necesario utilizar series temporales más extensas, tasas ajustadas por edad y modelos que tengan en cuenta la dependencia de las observaciones por provincia.
+
+# Referencias
+
+Gasparrini, A., Guo, Y., Hashizume, M., Lavigne, E., Zanobetti, A., Schwartz, J., Tobias, A., Tong, S., Rocklöv, J., Forsberg, B., Leone, M., De Sario, M., Bell, M. L., Guo, Y.-L. L., Wu, C.-F., Kan, H., Yi, S.-M., Coelho, M. de S. Z. S., Saldiva, P. H. N., … Armstrong, B. (2015). Mortality risk attributable to high and low ambient temperature: A multicountry observational study. *The Lancet, 386*(9991), 369–375. https://doi.org/10.1016/S0140-6736(14)62114-0
+
+Instituto Nacional de Estadística. (s. f.-a). *Defunciones por causas (capítulos) por sexo y provincia. ECM* (Tabla 73035) [Conjunto de datos]. https://www.ine.es/jaxiT3/Tabla.htm?t=73035
+
+Instituto Nacional de Estadística. (s. f.-b). *Indicadores de renta media y mediana. ADRH. Anual. Provincias. Atlas de distribución de renta de los hogares* (Tabla 53689) [Conjunto de datos]. https://www.ine.es/jaxiT3/Tabla.htm?t=53689
+
+Instituto Nacional de Estadística. (s. f.-c). *Población residente por fecha, sexo y edad (desde 1971)* (Tabla 56945) [Conjunto de datos]. https://www.ine.es/jaxiT3/Tabla.htm?t=56945
+
+Open-Meteo. (s. f.). *Historical weather API* [Conjunto de datos]. https://open-meteo.com/en/docs/historical-weather-api
+
+Pennsylvania State University. (s. f.-a). *Categorical predictors: Interaction effects*. STAT 501. https://online.stat.psu.edu/stat501/Lesson08
+
+Pennsylvania State University. (s. f.-b). *Multiple linear regression*. STAT 501. https://online.stat.psu.edu/stat501/Lesson05
+
+Schober, P., Boer, C., & Schwarte, L. A. (2018). Correlation coefficients: Appropriate use and interpretation. *Anesthesia & Analgesia, 126*(5), 1763–1768. https://doi.org/10.1213/ANE.0000000000002864
+
+Son, J.-Y., Liu, J. C., & Bell, M. L. (2019). Temperature-related mortality: A systematic review and investigation of effect modifiers. *Environmental Research Letters, 14*(7), 073004. https://doi.org/10.1088/1748-9326/ab1cdb
