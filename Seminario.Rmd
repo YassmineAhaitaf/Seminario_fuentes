@@ -282,6 +282,13 @@ Se combinaron métodos descriptivos y modelos inferenciales. Se adoptó un nivel
 
 Se calcularon la media, mediana, desviación estándar, mínimo y máximo para resumir la distribución de las variables. También se utilizaron tablas y gráficos (series temporales, diagramas de barras y diagramas de cajas) para describir la evolución y las diferencias entre provincias.
 
+### Regresión lineal simple
+
+Se utilizó para evaluar la tendencia lineal de la temperatura media anual a lo largo del periodo. El año se incluyó como variable explicativa y la temperatura media como variable respuesta.
+
+- **Hipótesis nula (\(H_0\)):** la pendiente de la recta es cero (\(\beta_1=0\)); no existe una tendencia lineal temporal.
+- **Hipótesis alternativa (\(H_1\)):** la pendiente es distinta de cero (\(\beta_1\neq 0\)); existe una tendencia lineal temporal.
+
 ### Correlación de Spearman
 
 Se utilizó para estudiar la dirección y la intensidad de la asociación monotónica entre temperatura media y tasa de mortalidad, y entre renta y tasa de mortalidad. Spearman trabaja con rangos y no exige que la relación sea lineal ni que las variables sigan una distribución normal.
@@ -406,6 +413,20 @@ ggplot(datos,
 modelo_temperatura <- lm(temperatura_media ~ Anyo,
                          data = temperaturas_anuales)
 summary(modelo_temperatura)
+
+ggplot(temperaturas_anuales, 
+       aes(x = Anyo, y = temperatura_media)) +
+  geom_point(size = 2.5) +
+  geom_smooth(method = "lm", 
+              formula = y ~ x,
+              se = TRUE) +
+  labs(
+    title = "Evolución de la temperatura media anual",
+    subtitle = "Regresión lineal simple (2015–2023)",
+    x = "Año",
+    y = "Temperatura media (°C)"
+  ) +
+  theme_minimal()
 ```
 
 La regresión estimó una pendiente positiva de 0,0835 °C por año, equivalente a unos 0,84 °C por década. Sin embargo, la pendiente no fue estadísticamente significativa (p = 0,1613). Por tanto, aunque la estimación apunta a una tendencia creciente, con solo nueve observaciones anuales no se dispone de evidencia suficiente para confirmar una tendencia lineal en este periodo. El R² fue 0,2595.
