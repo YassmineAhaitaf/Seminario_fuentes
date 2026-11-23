@@ -359,18 +359,9 @@ mortalidad en España: influencia del nivel socioeconómico provincial
 </div>
 
 
-<pre class="r"><code>library(jsonlite)</code></pre>
-<pre><code>## Warning: package &#39;jsonlite&#39; was built under R version 4.6.2</code></pre>
-<pre class="r"><code>library(dplyr)</code></pre>
-<pre><code>## 
-## Adjuntando el paquete: &#39;dplyr&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:stats&#39;:
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>library(ggplot2)
+<pre class="r"><code>library(jsonlite)
+library(dplyr)
+library(ggplot2)
 library(knitr)
 library(readr)</code></pre>
 <div id="introducción" class="section level1">
@@ -527,11 +518,10 @@ valores diarios para obtener los indicadores anuales. Por tanto, los
 valores representan las condiciones meteorológicas estimadas para las
 coordenadas de cada capital provincial y no una media espacial de toda
 la superficie de cada provincia. El script utiliza la selección
-predeterminada de modelos de la API (<em>Best Match</em>), sin
-especificar exclusivamente ERA5-Land. El script de descarga fue generado
-con ayuda de una herramienta de inteligencia artificial y se incluye en
-la carpeta <code>Datos</code> para documentar y facilitar la
-reproducción de este paso.</p>
+predeterminada de modelos de la API (<em>Best Match</em>). El script de
+descarga fue generado con ayuda de una herramienta de inteligencia
+artificial y se incluye en la carpeta <code>Datos</code> para documentar
+y facilitar la reproducción de este paso.</p>
 <p><strong>Importación.</strong> El archivo CSV de temperatura tiene una
 fila por fecha y provincia. Con <code>sep = &quot;,&quot;</code> y
 <code>dec = &quot;.&quot;</code> se indica el separador de columnas y el de
@@ -690,10 +680,10 @@ mortalidad:</h3>
 <code>inner_join()</code> y se calcula la tasa de mortalidad: fallecidos
 entre población por 100.000 habitantes, redondeada a número entero. La
 tasa se calcula, y la columna <code>Tasa_mortalidad</code> pasa después
-a las demás tablas, en lugar de recalcularla cada vez que se necesita.
-La tabla resultante, <code>mortalidad_poblacion</code>, contiene las 52
-provincias (468 filas). Se comprueban las dimensiones, que estén las 52
-provincias y los 9 años, y los valores ausentes .</p>
+a las demás tablas. La tabla resultante,
+<code>mortalidad_poblacion</code>, contiene las 52 provincias (468
+filas). Se comprueban las dimensiones, que estén las 52 provincias y los
+9 años, y los valores ausentes .</p>
 <pre class="r"><code># Integrar mortalidad y población
 mortalidad_poblacion &lt;- inner_join(
   mortalidad_limpia,

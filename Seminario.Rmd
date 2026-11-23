@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 library(jsonlite)
 library(dplyr)
 library(ggplot2)
@@ -87,7 +87,7 @@ renta_limpia <- renta %>%
 ### Datos de temperatura:
 
 **Obtención de los datos**: Los datos de temperatura se obtuvieron mediante la Historical Weather API de Open-Meteo. Se descargaron las temperaturas medias, máximas y mínimas diarias para el periodo 2015–2023, utilizando las coordenadas geográficas de las capitales de 50 provincias españolas. Posteriormente, los registros diarios se agruparon por provincia y año y se calculó la media de los valores diarios para obtener los indicadores anuales.
-Por tanto, los valores representan las condiciones meteorológicas estimadas para las coordenadas de cada capital provincial y no una media espacial de toda la superficie de cada provincia. El script utiliza la selección predeterminada de modelos de la API (*Best Match*), sin especificar exclusivamente ERA5-Land. El script de descarga fue generado con ayuda de una herramienta de inteligencia artificial y se incluye en la carpeta `Datos` para documentar y facilitar la reproducción de este paso.
+Por tanto, los valores representan las condiciones meteorológicas estimadas para las coordenadas de cada capital provincial y no una media espacial de toda la superficie de cada provincia. El script utiliza la selección predeterminada de modelos de la API (*Best Match*). El script de descarga fue generado con ayuda de una herramienta de inteligencia artificial y se incluye en la carpeta `Datos` para documentar y facilitar la reproducción de este paso.
 
 **Importación.** El archivo CSV de temperatura tiene una fila por fecha y provincia. Con `sep = ","` y `dec = "."` se indica el separador de columnas y el de decimales, y con `colClasses` se fija el tipo de cada columna (las tres primeras como texto, para conservar ceros como los de los códigos INE, y las tres últimas como números: temperatura media, máxima y mínima). Después, `as.Date()` convierte la columna `fecha` a formato fecha para poder extraer el año.
 
@@ -207,7 +207,7 @@ dim(poblacion_limpia)   # esperado: 468 filas
 
 ### Unión de mortalidad y población y cálculo de la tasa de mortalidad:
 
-Primero se unen la mortalidad y la población por provincia y año con `inner_join()` y se calcula la tasa de mortalidad: fallecidos entre población por 100.000 habitantes, redondeada a número entero. La tasa se calcula, y la columna `Tasa_mortalidad` pasa después a las demás tablas, en lugar de recalcularla cada vez que se necesita. La tabla resultante, `mortalidad_poblacion`, contiene las 52 provincias (468 filas). Se comprueban las dimensiones, que estén las 52 provincias y los 9 años, y los valores ausentes .
+Primero se unen la mortalidad y la población por provincia y año con `inner_join()` y se calcula la tasa de mortalidad: fallecidos entre población por 100.000 habitantes, redondeada a número entero. La tasa se calcula, y la columna `Tasa_mortalidad` pasa después a las demás tablas. La tabla resultante, `mortalidad_poblacion`, contiene las 52 provincias (468 filas). Se comprueban las dimensiones, que estén las 52 provincias y los 9 años, y los valores ausentes .
 
 ```{r}
 # Integrar mortalidad y población
